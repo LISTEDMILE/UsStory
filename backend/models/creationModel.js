@@ -44,7 +44,7 @@ const creationSchema = new mongoose.Schema({
     default: "public",
   },
 
-  music: {
+  musicMood: {
       type: String,
       enum: ["romantic", "happy", "calm", "nostalgic"],
     
@@ -75,6 +75,9 @@ const creationSchema = new mongoose.Schema({
   },
   password: {
     type: String,
+  },
+  accentColor: {
+    type:String,
   }
 });
 

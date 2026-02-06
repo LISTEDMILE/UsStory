@@ -12,5 +12,16 @@ creatorRouter.post(
   "/creation/:creationId",
   creatorController.getSingleCreation
 );
-
+creatorRouter.get(
+  "/creations",
+  creatorController.getCreations
+);
+creatorRouter.delete(
+  "/delete/:creationId",
+  creatorController.deleteCreation
+);
+creatorRouter.get(
+  "/editFetch/:creationId",
+  creatorController.getEditFetch
+);
 module.exports = creatorRouter;

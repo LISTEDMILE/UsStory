@@ -9,14 +9,17 @@ import LandingPage from "./general/LandingPage";
 import "./App.css";
 import CreateCreation from "./creator/createCreations";
 import SeeCreation from "./creator/seeCreation";
+import Footer from "./compo/footer";
+import Header from "./compo/header";
+import Creations from "./creator/creations";
 
 
 function Layout() {
   return (
     <>
-      {/* <Header /> */}
+      <Header/>
       <Outlet />
-      {/* <Footer /> */}
+     <Footer/>
     </>
   );
 }
@@ -53,9 +56,11 @@ function App() {
         { path: "/", element: <LandingPage /> },
         { path: "/auth/signUp", element: <SignUp /> },
         { path: "/auth/login", element: <Login /> },
+        { path: "/creator/create/:creationId", element: <CreateCreation /> },
         { path: "/creator/create", element: <CreateCreation /> },
-        {path:"/creator/creation/:creationId", element:<SeeCreation/>},
-       
+        { path: "/creator/creation/:creationId", element: <SeeCreation /> },
+        
+         { path: "/creator/creations", element: <Creations /> },
       ],
     },
   ]);

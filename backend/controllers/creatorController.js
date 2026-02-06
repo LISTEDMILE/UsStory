@@ -1,6 +1,7 @@
 const Creation = require("../models/creationModel");
 const cloudinary = require("../utils/cloudinary");
 const mongoose = require("mongoose");
+const Creator = require("../models/creatorModel");
 
 /**
  * POST /creator/create
@@ -8,7 +9,6 @@ const mongoose = require("mongoose");
  */
 exports.postCreateCreation = async (req, res) => {
   const uploadedPublicIds = [];
-
   try {
     /* ================= AUTH CHECK ================= */
     if (!req.session?.isLoggedIn || !req.session?._id) {
@@ -16,6 +16,9 @@ exports.postCreateCreation = async (req, res) => {
         errors: ["Unauthorized. Please login first."],
       });
     }
+
+   
+
 
     /* ================= INPUT ================= */
     let {
@@ -139,9 +142,16 @@ exports.postCreateCreation = async (req, res) => {
       
       if (creation.visibility === "private") {
           creation.password = creationPass;
-      }
+    }
+    
+
 
     await creation.save();
+    await Creator.findByIdAndUpdate(
+  req.session._id,
+  { $push: { creations: creation._id } }
+);
+
 
     /* ================= RESPONSE ================= */
     res.status(201).json({
@@ -167,6 +177,45 @@ exports.postCreateCreation = async (req, res) => {
   }
 };
 
+
+/**
+ * GET /creator/my-creations
+ * Returns minimal info for logged-in user's creations
+ */
+exports.getCreations = async (req, res) => {
+  try {
+    if (!req.session?.isLoggedIn || !req.session?._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const userId = req.session._id;
+
+   const creator = await Creator.findById(req.session._id)
+  .populate({
+    path: "creations",
+    select: "_id title recipientName createdAt visualMood",
+    options: { sort: { createdAt: -1 } }
+  });
+    
+    const creations = creator.creations;
+
+
+    return res.status(200).json({
+      success: true,
+      creations,
+    });
+
+  } catch (error) {
+    console.error("Get Creations Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch creations",
+    });
+  }
+};
 
 
 
@@ -223,3 +272,107 @@ exports.getSingleCreation = async (req, res) => {
     });
   }
 };
+
+
+exports.deleteCreation = async (req, res) => {
+  try {
+    /* ================= AUTH CHECK ================= */
+    if (!req?.session?.isLoggedIn || !req?.session?._id) {
+      return res.status(401).json({
+        success: false,
+        errors: ["Unauthorized Access"],
+      });
+    }
+
+    const creationId = req.params.creationId;
+
+    /* ================= FIND CREATION ================= */
+    const creation = await Creation.findById(creationId).select("creator");
+
+    if (!creation) {
+      return res.status(404).json({
+        success: false,
+        errors: ["Creation not found"],
+      });
+    }
+
+    /* ================= OWNERSHIP CHECK ================= */
+    if (creation.creator.toString() !== req.session._id) {
+      return res.status(403).json({
+        success: false,
+        errors: ["Unauthorized Access"],
+      });
+    }
+
+    /* ================= DELETE CREATION ================= */
+    await Creation.findByIdAndDelete(creationId);
+
+    /* ================= REMOVE FROM CREATOR ARRAY ================= */
+    await Creator.findByIdAndUpdate(req.session._id, {
+      $pull: { creations: creationId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Creation deleted successfully",
+    });
+
+  } catch (err) {
+    console.error("Delete Creation Error:", err);
+    return res.status(500).json({
+      success: false,
+      errors: ["Failed to delete creation"],
+    });
+  }
+};
+
+
+exports.getEditFetch = async (req, res) => {
+  try {
+    /* ================= AUTH CHECK ================= */
+    if (!req?.session?.isLoggedIn || !req?.session?._id) {
+      return res.status(401).json({
+        success: false,
+        errors: ["Unauthorized Access"],
+      });
+    }
+
+    const creationId = req.params.creationId;
+
+    const creation = await Creation.findById(creationId).select(
+  "recipientName title message relationshipType visibility musicMood theme accentColor closingNote timeline creator"
+);
+
+
+    if (!creation) {
+      return res.status(404).json({
+        success: false,
+        errors: ["Creation not found"],
+      });
+    }
+
+    /* ================= OWNERSHIP CHECK ================= */
+    if (creation.creator.toString() !== req.session._id) {
+      return res.status(403).json({
+        success: false,
+        errors: ["Unauthorized Access"],
+      });
+    }
+
+    
+   
+
+    /* ================= RETURN DATA ================= */
+    return res.status(200).json({
+      success: true,
+      creation,
+    });
+
+  } catch (err) {
+    console.error("Delete Creation Error:", err);
+    return res.status(500).json({
+      success: false,
+      errors: ["Failed to delete creation"],
+    });
+  }
+}

@@ -12,7 +12,7 @@ exports.getLogin = async (req, res, next) => {
   try {
  
       const creator = await Creator.findOne({ email: email }).select("_id password");
-      if (!creator) {
+    if (!creator) {
         return res.status(401).json({
           errors: ["Invalid Credentials."],
           oldInputs: {
@@ -215,7 +215,7 @@ exports.postLogOut = (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: "Logged out successfully.",
+      message: "Success",
     });
   });
 };
