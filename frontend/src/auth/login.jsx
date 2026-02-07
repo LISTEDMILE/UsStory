@@ -1,13 +1,17 @@
 import React, { useState } from "react";
+import PageLoader from "../compo/Loader";
+import { Link } from "react-router-dom";
 const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState([]);
+  const [loading, setLoading] = useState(false);
 
  const handleSubmit = async (e) => {
-  e.preventDefault();
+   e.preventDefault();
+   setLoading(true);
   setErrors([]);
 
    try {
@@ -31,12 +35,14 @@ export default function Login() {
     }
   } catch (err) {
     setErrors(["Login failed"]);
-  }
+   }
+   setLoading(false);
 };
 
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6  relative overflow-hidden">
+      
 
       {/* Soft Glow Background */}
       <div className="absolute inset-0 -z-10">
@@ -105,23 +111,33 @@ export default function Login() {
 
           {/* Button */}
           <button
-            type="submit"
-            className="mt-4 bg-white text-black py-3 rounded-xl font-medium tracking-wide hover:bg-white/90 transition duration-300"
-          >
-            Sign In
-          </button>
+  type="submit"
+  disabled={loading}
+  className={`mt-4 py-3 rounded-xl font-medium tracking-wide transition duration-300
+    ${
+      loading
+        ? "bg-white/40 text-black/60 cursor-not-allowed"
+        : "bg-white text-black hover:bg-white/90"
+    }`}
+>
+  {loading ? "Signing In..." : "Sign In"}
+</button>
+
 
         </form>
 
         {/* Footer */}
         <div className="mt-10 text-center text-xs text-white/40">
           Don’t have an account?{" "}
-          <span className="text-white hover:underline cursor-pointer">
+          <Link className="text-white hover:underline cursor-pointer"
+          to={"/auth/signUp"}>
             Register
-          </span>
+          </Link>
         </div>
 
       </div>
+{loading &&  <PageLoader text={"Signing In"}/>}
+     
     </div>
   );
 }

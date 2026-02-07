@@ -97,29 +97,47 @@ exports.postCreateCreation = async (req, res) => {
       : [];
 
     /* ================= CLOUDINARY UPLOAD ================= */
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        const file = req.files[i];
-        const momentIndex = imageIndexes[i];
+  
 
-        if (!timeline[momentIndex]) continue;
+   if (req.files && req.files.length > 0) {
+  const imageCountMap = {};
 
-        const upload = await cloudinary.uploader.upload(
-          `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
-          {
-            folder: "usstory/timeline",
-          }
-        );
+  imageIndexes.forEach((index) => {
+    imageCountMap[index] = (imageCountMap[index] || 0) + 1;
+  });
 
-        uploadedPublicIds.push(upload.public_id);
+  for (const index in imageCountMap) {
+    const existingCount = timeline[index]?.images?.length || 0;
 
-        timeline[momentIndex].images ??= [];
-        timeline[momentIndex].images.push({
-          url: upload.secure_url,
-          publicId: upload.public_id,
-        });
-      }
+    if (existingCount + imageCountMap[index] > 4) {
+      return res.status(400).json({
+        errors: ["Maximum 4 images allowed per moment"],
+      });
     }
+  }
+
+  // Now upload
+  for (let i = 0; i < req.files.length; i++) {
+    const file = req.files[i];
+    const momentIndex = imageIndexes[i];
+
+    if (!timeline[momentIndex]) continue;
+
+    const upload = await cloudinary.uploader.upload(
+      `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+      { folder: "usstory/timeline" }
+    );
+
+    uploadedPublicIds.push(upload.public_id);
+
+    timeline[momentIndex].images ??= [];
+    timeline[momentIndex].images.push({
+      url: upload.secure_url,
+      publicId: upload.public_id,
+    });
+  }
+}
+
 
     /* ================= CREATE ================= */
     const creation = new Creation({
@@ -137,8 +155,11 @@ exports.postCreateCreation = async (req, res) => {
       accentColor: accentColor || null,
 
       closingNote,
-      timeline,
+      timeline
     });
+
+    
+
       
       if (creation.visibility === "private") {
           creation.password = creationPass;
@@ -191,12 +212,12 @@ exports.getCreations = async (req, res) => {
       });
     }
 
-    const userId = req.session._id;
+   
 
    const creator = await Creator.findById(req.session._id)
   .populate({
     path: "creations",
-    select: "_id title recipientName createdAt visualMood",
+    select: "_id title recipientName",
     options: { sort: { createdAt: -1 } }
   });
     
@@ -238,7 +259,12 @@ exports.getSingleCreation = async (req, res) => {
     
 
     /* ================= FETCH ================= */
-      const creation = await Creation.findById(creationId).lean();
+    const creation = await Creation.findById(creationId)
+  .select(
+    "title recipientName message relationshipType visibility musicMood visualMood accentColor closingNote timeline creator"
+  )
+  .lean();
+
       
        if (!creation) {
       return res.status(404).json({
@@ -340,7 +366,7 @@ exports.getEditFetch = async (req, res) => {
     const creationId = req.params.creationId;
 
     const creation = await Creation.findById(creationId).select(
-  "recipientName title message relationshipType visibility musicMood theme accentColor closingNote timeline creator"
+  "recipientName title message relationshipType visibility musicMood theme accentColor closingNote timeline creator password"
 );
 
 
@@ -376,3 +402,168 @@ exports.getEditFetch = async (req, res) => {
     });
   }
 }
+
+exports.putUpdateCreation = async (req, res) => {
+  const uploadedPublicIds = [];
+
+  try {
+    if (!req?.session?.isLoggedIn || !req?.session?._id) {
+      return res.status(401).json({
+        errors:["Unauthorized Access"]
+      })
+    }
+    const { creationId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(creationId)) {
+      return res.status(400).json({ errors: ["Invalid creation ID"] });
+    }
+
+    const creation = await Creation.findById(creationId);
+    if (!creation) {
+      return res.status(404).json({ errors: ["Creation not found"] });
+    }
+
+    if (creation.creator.toString() !== req.session._id) {
+       return res.status(401).json({
+        errors:["Unauthorized Access"]
+      })
+    }
+    /* ================= PARSE BODY ================= */
+
+    let {
+      recipientName,
+      title,
+      message,
+      relationshipType,
+      visibility,
+      musicMood,
+      visualMood,
+      accentColor,
+      closingNote,
+      timeline,
+    } = req.body;
+
+    if (typeof timeline === "string") {
+      timeline = JSON.parse(timeline);
+    }
+
+    if (!Array.isArray(timeline)) {
+      return res.status(400).json({ errors: ["Invalid timeline format"] });
+    }
+
+    /* ================= PARSE IMAGE INDEXES ================= */
+
+    const imageIndexes = req.body.imageMomentIndex
+      ? Array.isArray(req.body.imageMomentIndex)
+        ? req.body.imageMomentIndex.map(Number)
+        : [Number(req.body.imageMomentIndex)]
+      : [];
+
+    /* ================= DELETE REMOVED IMAGES ================= */
+
+    const oldPublicIds = creation.timeline.flatMap(item =>
+      item.images.map(img => img.publicId).filter(Boolean)
+    );
+
+    const newPublicIds = timeline.flatMap(item =>
+      (item.images || []).map(img => img.publicId).filter(Boolean)
+    );
+
+    const removedPublicIds = oldPublicIds.filter(
+      id => !newPublicIds.includes(id)
+    );
+
+    await Promise.all(
+      removedPublicIds.map(id => cloudinary.uploader.destroy(id))
+    );
+
+    /* ================= VALIDATE IMAGE LIMIT ================= */
+
+    if (req.files && req.files.length > 0) {
+      const imageCountMap = {};
+
+      imageIndexes.forEach(index => {
+        imageCountMap[index] = (imageCountMap[index] || 0) + 1;
+      });
+
+      for (const index in imageCountMap) {
+        const originalMoment = creation.timeline[index];
+        const existingCount = originalMoment?.images?.length || 0;
+
+        if (existingCount + imageCountMap[index] > 4) {
+          return res.status(400).json({
+            errors: ["Maximum 4 images allowed per moment"],
+          });
+        }
+      }
+
+      /* ================= UPLOAD NEW IMAGES ================= */
+
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const momentIndex = imageIndexes[i];
+
+        if (!timeline[momentIndex]) continue;
+
+        const upload = await cloudinary.uploader.upload(
+          `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+          { folder: "usstory/timeline" }
+        );
+
+        uploadedPublicIds.push(upload.public_id);
+
+        timeline[momentIndex].images ??= [];
+        timeline[momentIndex].images.push({
+          url: upload.secure_url,
+          publicId: upload.public_id,
+        });
+      }
+    }
+
+    /* ================= UPDATE FIELDS ================= */
+
+    creation.recipientName = recipientName;
+    creation.title = title;
+    creation.message = message;
+    creation.relationshipType = relationshipType;
+    creation.visibility = visibility || "public";
+    creation.musicMood = musicMood || null;
+    creation.visualMood = visualMood || "warm";
+    creation.accentColor = accentColor || null;
+    creation.closingNote = closingNote || null;
+
+    creation.timeline = timeline;
+
+    if (creation.visibility === "private") {
+      if (!req.body.password) {
+        return res.status(400).json({ errors: ["Password required"] });
+      }
+      creation.password = req.body.password;
+    }
+
+    await creation.save();
+
+    return res.json({
+      success: true,
+      message: "Creation updated successfully",
+    });
+
+  } catch (err) {
+    console.error("Update Creation Error:", err);
+
+    /* ================= ROLLBACK UPLOADS ================= */
+
+    for (const publicId of uploadedPublicIds) {
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (e) {
+        console.error("Rollback failed:", e);
+      }
+    }
+
+    return res.status(500).json({
+      errors: ["Failed to update creation"],
+    });
+  }
+};
+

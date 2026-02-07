@@ -1,13 +1,25 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
-  return (
-    <footer className="relative mt-40 overflow-hidden border-t border-white/10 bg-black/80 backdrop-blur-3xl">
+  return (<>
+    {/* ================= FOOTER ================= */}
+      <footer className="border-t border-white/10 py-10 text-center text-white/40">
+      <div className="flex justify-center gap-8 mb-8 ">
+        <Link to="/" className="hover:text-white">Home</Link>
+          <Link to="/aboutUs" className="hover:text-white">About</Link>
+        <Link to="/help" className="hover:text-white">Help</Link>
+        <Link to="/contactUs" className="hover:text-white">Contact Us</Link>
+          <Link to="/auth/login" className="hover:text-white">Login</Link>
+          <Link to="/auth/signUp" className="hover:text-white">Sign Up</Link>
+        </div>
 
-      {/* Soft Background Glow */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/3 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-white/5 blur-3xl animate-pulse" />
-      </div>
+        <p>UsStory. Crafted with emotion.</p>
+      </footer>
+    <footer className="relative mt-10 overflow-hidden border-t border-white/10 bg-white/30 backdrop-blur-3xl">
+     
+
+     
 
       <div className="max-w-6xl mx-auto px-6 py-28 flex flex-col items-center text-center space-y-10">
 
@@ -50,8 +62,9 @@ export default function Footer() {
             </span>
           </div>
         </div>
-
+   
       </div>
-    </footer>
+    
+    </footer></>
   );
 }

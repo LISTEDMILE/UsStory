@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const cloudinary = require("../utils/cloudinary");
 
 const creationSchema = new mongoose.Schema({
   creator: {
@@ -34,7 +35,7 @@ const creationSchema = new mongoose.Schema({
       title: String,
       description: String,
       date: Date,
-      images: [{ url: String }],
+      images: [{ url: String ,publicId:String}],
     },
   ],
 
@@ -46,22 +47,12 @@ const creationSchema = new mongoose.Schema({
 
   musicMood: {
       type: String,
-      enum: ["romantic", "happy", "calm", "nostalgic"],
-    
+    default:"romantic"
   },
 
   relationshipType: {
     type: String,
-    enum: [
-      "friend",
-      "best-friend",
-      "love",
-      "family",
-      "mentor",
-      "colleague",
-      "custom",
-    ],
-    required: true,
+   
   },
 
   visualMood: {
@@ -80,5 +71,22 @@ const creationSchema = new mongoose.Schema({
     type:String,
   }
 });
+
+
+
+creationSchema.pre("findOneAndDelete", async function () {
+  const creation = await this.model.findOne(this.getFilter());
+  if (!creation) return;
+
+  for (const item of creation.timeline) {
+    for (const image of item.images) {
+      if (image.publicId) {
+        await cloudinary.uploader.destroy(image.publicId);
+      }
+    }
+  }
+});
+
+
 
 module.exports = mongoose.model("Creation", creationSchema);

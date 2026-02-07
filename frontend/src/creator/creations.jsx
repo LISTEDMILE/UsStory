@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { apiFetch } from "../api/api";
 import { Link } from "react-router-dom";
+import PageLoader from "../compo/Loader";
 
 export default function Creations() {
   const { _id } = useSelector((state) => state.userInfo);
@@ -51,14 +52,6 @@ export default function Creations() {
     alert("Link copied!");
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Loading your creations...
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white px-6 py-24 ">
       <h1 className="text-3xl md:text-4xl font-light mb-16 tracking-wide">
@@ -91,15 +84,15 @@ export default function Creations() {
                   View
                 </Link>
 
-                      <button
-                          onClick={() => copyLink(creation._id)}
+                <button
+                  onClick={() => copyLink(creation._id)}
                   className="px-4 py-2 text-xs border border-white/20 rounded-full hover:bg-white hover:text-black transition duration-300"
                 >
                   Copy Link
                 </button>
 
                 <Link
-                  to={`/edit/${creation._id}`}
+                  to={`/creator/create/${creation._id}`}
                   className="px-4 py-2 text-xs border border-white/20 rounded-full hover:bg-white hover:text-black transition duration-300"
                 >
                   Edit
@@ -116,6 +109,8 @@ export default function Creations() {
           ))}
         </div>
       )}
+
+      {loading && <PageLoader text={"Loading your creations..."} />}
     </div>
   );
 }

@@ -27,11 +27,10 @@ export default function SeeCreation() {
           method: "POST",
         });
 
-        // if (!data.ok) {
-        //   throw new Error(data?.errors?.[0] || "Failed to load creation");
-        // }
 
         setCreation(data.creation);
+        
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -286,6 +285,10 @@ tll.from(".headMessage", {
 
   if (!creation) return null;
 
+  const selectedTrack = MUSIC_MAP.find(
+  (track) => track.id === creation.musicMood
+);
+
   const theme = THEME_MAP[creation.visualMood] || THEME_MAP.warm;
 
   /* ================= UI ================= */
@@ -296,7 +299,7 @@ tll.from(".headMessage", {
       style={{ "--accent": creation.accentColor }}
     >
 
-      {/* {creation.musicMood && (
+      {selectedTrack  && (
   <div
     className={`fixed inset-0 z-[999] flex items-center justify-center bg-black/90 cursor-pointer ${musicStarted && "hidden"}`}
     onClick={() => {
@@ -331,7 +334,7 @@ tll.from(".headMessage", {
   </div>
 )}
 
-       */}
+      
 
       <div className="fixed top-0 left-0 z-50 h-1 w-full bg-white/10">
         <div
@@ -348,16 +351,21 @@ tll.from(".headMessage", {
       </div>
 
       {/* ===== MUSIC ===== */}
-      {creation.musicMood && (
-        <audio ref={audioRef} src={MUSIC_MAP[creation.musicMood]} loop />
-      )}
+      {selectedTrack && (
+  <audio
+    ref={audioRef}
+    src={selectedTrack.file}
+    loop
+  />
+)}
+
      
 
       {/* ===== HERO ===== */}
       <section className="headTrigger relative h-[600vh] flex justify-center  ">
         <div className="scrollHint absolute flex top-50 flex-col items-center text-sm opacity-70">
   <span className="mb-4 tracking-widest uppercase text-2xl">
-    Scroll Down
+    Scroll Down Slowly...
   </span>
 
   <div className="w-14 h-25 border-2 border-current rounded-full flex justify-center">
@@ -372,9 +380,6 @@ tll.from(".headMessage", {
           {creation.title}
         </h1>
 
-        {/* <p className="headName absolute fade-up mt-6  opacity-80 text-cyan-800 text-6xl">
-          For {creation.recipientName}
-          </p> */}
           
           <p className="headName absolute mt-6 opacity-80 
   text-2xl md:text-3xl 
@@ -446,19 +451,42 @@ tll.from(".headMessage", {
                   
 
 
-                  {/* IMAGE SIDE */}
-                  <div className="w-full md:w-1/2 p-10 flex justify-center">
-                  
-                      {moment.images.map((img, idx) => (
-                        <img
-                          key={idx}
-                          src={img.url}
-                          className="innerImage aspect-[4/5] rounded-2xl object-cover shadow-xl"
-                        />
-                      ))}
             
-                  </div>
 
+                  
+                  <div className="w-full md:w-1/2 p-10 flex justify-center">
+  {moment.images?.length > 0 ? (
+    <div className="w-full h-[500px] overflow-hidden rounded-2xl">
+      {moment.images.length === 1 ? (
+        <img
+          src={moment.images[0].url}
+          className="innerImage w-full h-full object-cover rounded-2xl shadow-xl"
+        />
+      ) : (
+        <div className="grid grid-cols-2 gap-2 w-full h-full">
+          {moment.images.slice(0, 4).map((img, idx) => (
+            <img
+              key={idx}
+              src={img.url}
+              className="innerImage w-full h-full object-cover rounded-xl"
+            />
+          ))}
+          {moment.images.length > 4 && (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-2xl font-semibold">
+              +{moment.images.length - 4}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  ) : (
+    <div className="w-full h-[500px] flex items-center justify-center rounded-2xl bg-white/5 text-white/40">
+      No Image
+    </div>
+  )}
+</div>
+
+                  
                   {/* TEXT SIDE */}
                   <div className="w-full md:w-1/2 p-10">
                     <h2 className="innerTitle text-3xl md:text-4xl font-semibold">
