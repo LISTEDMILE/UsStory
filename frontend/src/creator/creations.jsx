@@ -47,7 +47,7 @@ export default function Creations() {
   };
 
   const copyLink = (id) => {
-    const link = `${window.location.origin}/creator/creation/${id}`;
+    const link = `${window.location.origin}/viewer/creation/${id}`;
     navigator.clipboard.writeText(link);
     alert("Link copied!");
   };
