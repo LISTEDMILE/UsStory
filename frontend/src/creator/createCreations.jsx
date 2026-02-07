@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import PageLoader from "../compo/Loader";
+import imageCompression from "browser-image-compression";
+
 import { MUSIC_MAP, possibleRelationShipTypes } from "../hub/hub";
 
 export default function CreateCreation() {
@@ -136,17 +138,34 @@ export default function CreateCreation() {
     setTimeline(timeline.filter((_, i) => i !== index));
   };
 
-  const handleImageAdd = (index, files) => {
-    const updated = [...timeline];
+ const handleImageAdd = async (index, files) => {
+  const updated = [...timeline];
 
-    const newImages = Array.from(files).map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-    }));
-
-    updated[index].images = [...updated[index].images, ...newImages];
-    setTimeline(updated);
+  const options = {
+    maxSizeMB: 1,               // Max 1MB
+    maxWidthOrHeight: 1200,     // Resize if too large
+    useWebWorker: true,
   };
+
+  const compressedImages = await Promise.all(
+    Array.from(files).map(async (file) => {
+      const compressedFile = await imageCompression(file, options);
+
+      return {
+        file: compressedFile,
+        preview: URL.createObjectURL(compressedFile),
+      };
+    })
+  );
+
+  updated[index].images = [
+    ...updated[index].images,
+    ...compressedImages,
+  ];
+
+  setTimeline(updated);
+};
+
 
   const removeImage = (momentIndex, imageIndex) => {
     const updated = [...timeline];
