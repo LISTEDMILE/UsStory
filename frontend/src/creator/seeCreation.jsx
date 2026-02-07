@@ -182,7 +182,6 @@ export default function SeeCreation() {
           start: "top 0%",
           end: "top -80%",
           scrub: 3,
-          markers: true,
         },
 
         x: "100vw",
@@ -195,7 +194,6 @@ export default function SeeCreation() {
           start: "top -150%",
           end: "top -200%",
           scrub: 3,
-          markers: true,
         },
       });
 
@@ -205,7 +203,6 @@ export default function SeeCreation() {
           start: "top -220%",
           end: "top -350%",
           scrub: 3,
-          markers: true,
         },
       });
 
@@ -226,7 +223,6 @@ export default function SeeCreation() {
           start: "top -320%",
           end: "top -500%",
           scrub: 3,
-          markers: true,
         },
       });
 
