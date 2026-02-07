@@ -3,21 +3,17 @@ import { useParams } from "react-router-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import PageLoader from "../compo/Loader";
-import { MUSIC_MAP , possibleRelationShipTypes } from "../hub/hub";
-
+import { MUSIC_MAP, possibleRelationShipTypes } from "../hub/hub";
 
 export default function CreateCreation() {
   const { creationId } = useParams(); // 👈 Detect edit mode
   const container = useRef(null);
 
-
-const audioRef = useRef(null);
-const [previewing, setPreviewing] = useState(null);
-
+  const audioRef = useRef(null);
+  const [previewing, setPreviewing] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isEditMode = Boolean(creationId);
-
- 
 
   /* ================= MAIN FORM STATE ================= */
   const [form, setForm] = useState({
@@ -167,10 +163,9 @@ const [previewing, setPreviewing] = useState(null);
 
     setLoading(true);
     if (audioRef.current) {
-  audioRef.current.pause();
-  setPreviewing(null);
-}
-
+      audioRef.current.pause();
+      setPreviewing(null);
+    }
 
     try {
       const finalRelationShipType =
@@ -314,43 +309,6 @@ const [previewing, setPreviewing] = useState(null);
           />
         </div>
 
-        {/* Relationship */}
-        <div className="form-section">
-          <label className="mb-2 block text-sm text-neutral-400">
-            Relationship Type
-          </label>
-          <select
-            name="relationshipType"
-            value={form.relationshipType}
-            onChange={handleChange}
-            className="w-full rounded-xl border border-white/10 bg-black px-5 py-4"
-          >
-            <option value="friend">Friend</option>
-            <option value="best-friend">Best Friend</option>
-            <option value="love">Love</option>
-            <option value="family">Family</option>
-            <option value="mentor">Mentor</option>
-            <option value="colleague">Colleague</option>
-            <option value="custom">Custom</option>
-          </select>
-
-          {/* Show custom input if selected */}
-          {form.relationshipType === "custom" && (
-            <input
-              type="text"
-              name="customRelationship"
-              placeholder="Enter relationship..."
-              value={customRelationship}
-              onChange={(e) => {
-                setCustomRelationship(e.target.value);
-              }}
-              required
-              maxLength={30}
-              className="mt-4 w-full rounded-xl border border-white/10 bg-white/5 px-5 py-4 outline-none focus:border-violet-500"
-            />
-          )}
-        </div>
-
         {/* Visibility & Music */}
         <div className="form-section grid gap-6 md:grid-cols-2">
           <div>
@@ -370,105 +328,136 @@ const [previewing, setPreviewing] = useState(null);
 
           {/* Password (ONLY IF PRIVATE) */}
           {form.visibility === "private" && (
-            <div className="form-section">
+            <div className="form-section relative">
               <label className="mb-2 block text-sm text-neutral-400">
                 Story Password *
               </label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-4"
-              />
+
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-5 py-4 pr-14 focus:outline-none focus:border-white/30 transition"
+                />
+
+                {/* Show / Hide Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-neutral-400 hover:text-white transition"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
           )}
 
-          {/* <div>
+          {/* Relationship */}
+          <div className="form-section">
             <label className="mb-2 block text-sm text-neutral-400">
-              Music Mood
+              Relationship Type
             </label>
             <select
-              name="musicMood"
-              value={form.musicMood}
+              name="relationshipType"
+              value={form.relationshipType}
               onChange={handleChange}
               className="w-full rounded-xl border border-white/10 bg-black px-5 py-4"
             >
-              <option value="romantic">Romantic</option>
-              <option value="happy">Happy</option>
-              <option value="calm">Calm</option>
-              <option value="nostalgic">Nostalgic</option>
+              <option value="friend">Friend</option>
+              <option value="best-friend">Best Friend</option>
+              <option value="love">Love</option>
+              <option value="family">Family</option>
+              <option value="mentor">Mentor</option>
+              <option value="colleague">Colleague</option>
+              <option value="custom">Custom</option>
             </select>
-          </div> */}
 
+            {/* Show custom input if selected */}
+            {form.relationshipType === "custom" && (
+              <input
+                type="text"
+                name="customRelationship"
+                placeholder="Enter relationship..."
+                value={customRelationship}
+                onChange={(e) => {
+                  setCustomRelationship(e.target.value);
+                }}
+                required
+                maxLength={30}
+                className="mt-4 w-full rounded-xl border border-white/10 bg-white/5 px-5 py-4 outline-none focus:border-violet-500"
+              />
+            )}
+          </div>
+        </div>
 
-          <div className="form-section">
-  <label className="mb-4 block text-sm text-neutral-400">
-    Background Music
-  </label>
+        {/*music */}
 
-  <div className="space-y-4">
-    {MUSIC_MAP.map((track) => (
-      <div
-        key={track.id}
-        className={`flex items-center justify-between rounded-xl border px-5 py-4 transition
+        <div className="form-section">
+          <label className="mb-4 block text-sm text-neutral-400">
+            Background Music
+          </label>
+
+          <div className="space-y-4">
+            {MUSIC_MAP.map((track) => (
+              <div
+                key={track.id}
+                className={`flex items-center justify-between rounded-xl border px-5 py-4 transition
           ${
             form.musicMood === track.id
               ? "border-violet-500 bg-white/10"
               : "border-white/10 bg-white/5"
           }`}
-      >
-        {/* Track Info */}
-        <div>
-          <p className="font-medium">{track.name}</p>
-        </div>
+              >
+                {/* Track Info */}
+                <div>
+                  <p className="font-medium">{track.name}</p>
+                </div>
 
-        {/* Controls */}
-        <div className="flex gap-3 items-center">
+                {/* Controls */}
+                <div className="flex gap-3 items-center">
+                  {/* Preview Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!audioRef.current) return;
 
-          {/* Preview Button */}
-          <button
-            type="button"
-            onClick={() => {
-              if (!audioRef.current) return;
+                      if (previewing === track.id) {
+                        audioRef.current.pause();
+                        setPreviewing(null);
+                      } else {
+                        audioRef.current.src = track.file;
+                        audioRef.current.currentTime = 0;
+                        audioRef.current.play();
+                        setPreviewing(track.id);
+                      }
+                    }}
+                    className="text-sm px-3 py-1 rounded-full border border-white/20 hover:bg-white/10"
+                  >
+                    {previewing === track.id ? "Stop" : "Preview"}
+                  </button>
 
-              if (previewing === track.id) {
-                audioRef.current.pause();
-                setPreviewing(null);
-              } else {
-                audioRef.current.src = track.file;
-                audioRef.current.currentTime = 0;
-                audioRef.current.play();
-                setPreviewing(track.id);
-              }
-            }}
-            className="text-sm px-3 py-1 rounded-full border border-white/20 hover:bg-white/10"
-          >
-            {previewing === track.id ? "Stop" : "Preview"}
-          </button>
+                  {/* Select Button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        musicMood: track.id,
+                      }))
+                    }
+                    className="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 text-black"
+                  >
+                    {form.musicMood === track.id ? "Selected" : "Select"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
-          {/* Select Button */}
-          <button
-            type="button"
-            onClick={() =>
-              setForm((prev) => ({
-                ...prev,
-                musicMood: track.id,
-              }))
-            }
-            className="text-sm px-3 py-1 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 text-black"
-          >
-            {form.musicMood === track.id ? "Selected" : "Select"}
-          </button>
-        </div>
-      </div>
-    ))}
-  </div>
-
-  <audio ref={audioRef} />
-</div>
-
+          <audio ref={audioRef} />
         </div>
 
         {/* Visual Mood */}
@@ -656,8 +645,7 @@ const [previewing, setPreviewing] = useState(null);
         </div>
       </form>
 
-      {loading && <PageLoader text={"Loading"}/>}
-      
+      {loading && <PageLoader text={"Loading"} />}
     </div>
   );
 }

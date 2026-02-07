@@ -35,7 +35,6 @@ export default function Help() {
     },
   ];
 
-
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
@@ -67,17 +66,15 @@ export default function Help() {
               onClick={() => toggleFAQ(index)}
               className="w-full flex justify-between items-center text-left"
             >
-              <span className="text-lg font-medium">
-                {faq.question}
-              </span>
-              <span className="text-xl">
-                {openIndex === index ? "−" : "+"}
-              </span>
+              <span className="text-lg font-medium">{faq.question}</span>
+              <span className="text-xl">{openIndex === index ? "−" : "+"}</span>
             </button>
 
             <div
               className={`overflow-hidden transition-all duration-500 ${
-                openIndex === index ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
+                openIndex === index
+                  ? "max-h-40 mt-4 opacity-100"
+                  : "max-h-0 opacity-0"
               }`}
             >
               <p className="text-white/60">{faq.answer}</p>
@@ -88,9 +85,7 @@ export default function Help() {
 
       {/* CONTACT SECTION */}
       <div className="helpReveal mt-32 text-center">
-        <h2 className="text-4xl font-semibold mb-6">
-          Still Need Help?
-        </h2>
+        <h2 className="text-4xl font-semibold mb-6">Still Need Help?</h2>
 
         <p className="text-white/60 mb-10">
           If you can't find your answer here, feel free to reach out.
@@ -115,7 +110,8 @@ export default function Help() {
 
       {/* FOOTER */}
       <footer className="mt-32 text-center text-white/40 text-sm">
-        Need urgent assistance? We’re here to help you create something beautiful.
+        Need urgent assistance? We’re here to help you create something
+        beautiful.
       </footer>
     </div>
   );

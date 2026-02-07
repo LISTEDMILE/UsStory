@@ -15,16 +15,12 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-
-      
-      
       const ress = await fetch(`${API_BASE}/auth/signUp`, {
         method: "POST",
-         credentials: "include", // 🔥 REQUIRED
-    headers: {
-      "Content-Type": "application/json",
-      
-    },
+        credentials: "include", // 🔥 REQUIRED
+        headers: {
+          "Content-Type": "application/json",
+        },
 
         body: JSON.stringify({ email, password }),
       });
@@ -45,22 +41,18 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-6 relative overflow-hidden">
-
       {/* Soft Glow Background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-1/3 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-white/5 blur-3xl" />
       </div>
 
       <div className="w-full max-w-md rounded-3xl bg-white/5 backdrop-blur-2xl border border-white/10 p-10 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-
         {/* Heading */}
         <h2 className="text-3xl font-light mb-2 tracking-wide">
           Create Account
         </h2>
 
-        <p className="text-white/50 text-sm mb-10">
-          Begin your story journey
-        </p>
+        <p className="text-white/50 text-sm mb-10">Begin your story journey</p>
 
         {/* Errors */}
         {errors.length > 0 && (
@@ -76,7 +68,6 @@ export default function SignUp() {
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
           {/* Email */}
           <div className="flex flex-col gap-2">
             <label className="text-xs uppercase tracking-widest text-white/40">

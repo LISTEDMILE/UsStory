@@ -1,54 +1,54 @@
 const { check, validationResult } = require("express-validator");
-const Creations = require('../models/creationModel');
-const Creator = require('../models/creatorModel');
+const Creations = require("../models/creationModel");
+const Creator = require("../models/creatorModel");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 exports.getLogin = async (req, res, next) => {
-    if (!req.body || !req.body.email || !req.body.password) {
-        return res.status(400).json({errors:["Send All Credentials."]})
-    }
+  if (!req.body || !req.body.email || !req.body.password) {
+    return res.status(400).json({ errors: ["Send All Credentials."] });
+  }
   const { email, password } = req.body;
   try {
- 
-      const creator = await Creator.findOne({ email: email }).select("_id password");
+    const creator = await Creator.findOne({ email: email }).select(
+      "_id password",
+    );
     if (!creator) {
-        return res.status(401).json({
-          errors: ["Invalid Credentials."],
-          oldInputs: {
-            email: email,
-            password: password,
-          },
-        });
-      }
-
-       const isMatch = await bcrypt.compare(password, creator.password);
-      if (!isMatch) {
-        return res.status(401).json({
-          errors: ["Invalid Credentials."],
-          oldInputs: {
-            email: email,
-            password: password,
-          },
-        });
-      }
-
-      req.session.regenerate((err) => {
-        if (err) {
-          console.error("Session save error : ", err);
-          return res.status(500).json({
-            errors: ["An error occured."],
-          });
-        }
-
-        req.session.isLoggedIn = true;
-          req.session._id = creator._id.toString();
-
-        res.status(200).json({
-          message: "Success",
-        });
+      return res.status(401).json({
+        errors: ["Invalid Credentials."],
+        oldInputs: {
+          email: email,
+          password: password,
+        },
       });
-    
+    }
+
+    const isMatch = await bcrypt.compare(password, creator.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        errors: ["Invalid Credentials."],
+        oldInputs: {
+          email: email,
+          password: password,
+        },
+      });
+    }
+
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error("Session save error : ", err);
+        return res.status(500).json({
+          errors: ["An error occured."],
+        });
+      }
+
+      req.session.isLoggedIn = true;
+      req.session._id = creator._id.toString();
+
+      res.status(200).json({
+        message: "Success",
+      });
+    });
   } catch (err) {
     console.error("Error finding User:", err);
     res.status(500).json({
@@ -61,10 +61,7 @@ exports.getLogin = async (req, res, next) => {
   }
 };
 
-
-
 exports.postSignUp = [
- 
   check("email")
     .isEmail()
     .withMessage("Please enter a valid email")
@@ -90,10 +87,10 @@ exports.postSignUp = [
     .withMessage("Password must contain at least one special character")
     .trim(),
   async (req, res, next) => {
-      try {
-        if (!req.body || !req.body.email || !req.body.password) {
-        return res.status(400).json({errors:["Send All Credentials."]})
-    }
+    try {
+      if (!req.body || !req.body.email || !req.body.password) {
+        return res.status(400).json({ errors: ["Send All Credentials."] });
+      }
       const { email, password } = req.body;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -105,10 +102,9 @@ exports.postSignUp = [
           },
         });
       }
-     
+
       bcrypt.hash(password, 12).then((hashedPassword) => {
         const creator = new Creator({
-    
           email: email,
           password: hashedPassword,
         });
@@ -124,9 +120,9 @@ exports.postSignUp = [
                 });
               }
 
-             req.session.isLoggedIn = true;
-                req.session._id = creator._id.toString();
-                
+              req.session.isLoggedIn = true;
+              req.session._id = creator._id.toString();
+
               res.status(201).json({
                 message: "Success",
               });
@@ -220,12 +216,11 @@ exports.postLogOut = (req, res, next) => {
   });
 };
 
-
 exports.postMe = (req, res, next) => {
   if (req.session.isLoggedIn && req.session._id) {
     return res.json({
       isLoggedIn: true,
-      _id:req.session._id,
+      _id: req.session._id,
     });
   } else {
     return res.json({

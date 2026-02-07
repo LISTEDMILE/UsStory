@@ -35,7 +35,7 @@ const creationSchema = new mongoose.Schema({
       title: String,
       description: String,
       date: Date,
-      images: [{ url: String ,publicId:String}],
+      images: [{ url: String, publicId: String }],
     },
   ],
 
@@ -46,19 +46,18 @@ const creationSchema = new mongoose.Schema({
   },
 
   musicMood: {
-      type: String,
-    default:"romantic"
+    type: String,
+    default: "romantic",
   },
 
   relationshipType: {
     type: String,
-   
   },
 
   visualMood: {
-      type: String,
-      enum: ["dark", "light", "pastel", "warm"],
-      default: "warm",
+    type: String,
+    enum: ["dark", "light", "pastel", "warm"],
+    default: "warm",
   },
   closingNote: {
     type: String,
@@ -68,11 +67,9 @@ const creationSchema = new mongoose.Schema({
     type: String,
   },
   accentColor: {
-    type:String,
-  }
+    type: String,
+  },
 });
-
-
 
 creationSchema.pre("findOneAndDelete", async function () {
   const creation = await this.model.findOne(this.getFilter());
@@ -86,7 +83,5 @@ creationSchema.pre("findOneAndDelete", async function () {
     }
   }
 });
-
-
 
 module.exports = mongoose.model("Creation", creationSchema);

@@ -8,7 +8,7 @@ import { MUSIC_MAP, THEME_MAP } from "../hub/hub";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function SeeCreation() {
+export default function SeeCreationViewer() {
   const container = useRef(null);
   const audioRef = useRef(null);
 
@@ -16,18 +16,57 @@ export default function SeeCreation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [musicStarted, setMusicStarted] = useState(false);
+  const [showPass, setShowPass] = useState(true);
+  const [password, setPassword] = useState("");
+  const [passError, setPassError] = useState("");
+  const [passLoading, setPassLoading] = useState(false);
 
   const { creationId } = useParams();
 
+  const fetchCreation = async () => {
+    const data = await apiFetch(`/viewer/creation/${creationId}`, {
+      method: "POST",
+    });
+
+    setCreation(data.creation);
+  };
+
+  const fetchCreationPass = async () => {
+    try {
+      setPassLoading(true);
+      setPassError("");
+
+      const data = await apiFetch(`/viewer/creation/${creationId}`, {
+        method: "POST",
+        body: JSON.stringify({ password }),
+      });
+
+      setCreation(data.creation);
+      setShowPass(false);
+    } catch (err) {
+      setPassError(err.message || "Wrong password");
+    } finally {
+      setPassLoading(false);
+    }
+  };
+
   /* ================= FETCH STORY ================= */
   React.useEffect(() => {
-    const fetchCreation = async () => {
+    const fetchIsPrivate = async () => {
       try {
-        const data = await apiFetch(`/creator/creation/${creationId}`, {
-          method: "POST",
-        });
+        const isPrivateData = await apiFetch(
+          `/viewer/isPrivate/${creationId}`,
+          {
+            method: "GET",
+          },
+        );
 
-        setCreation(data.creation);
+        const isPrivate = isPrivateData.visibility === "private";
+
+        if (!isPrivate) {
+          setShowPass(false);
+          fetchCreation();
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -35,7 +74,7 @@ export default function SeeCreation() {
       }
     };
 
-    fetchCreation();
+    fetchIsPrivate();
   }, [creationId]);
 
   /* ================= GSAP ================= */
@@ -275,6 +314,44 @@ export default function SeeCreation() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black text-red-400">
         {error}
+      </div>
+    );
+  }
+
+  if (showPass) {
+    return (
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 backdrop-blur-md">
+        <div className="w-[90vw] max-w-md bg-white/5 border border-white/10 backdrop-blur-2xl rounded-3xl p-8 text-white shadow-2xl">
+          <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+            This story is private
+          </h2>
+
+          <p className="text-center text-sm opacity-60 mb-8">
+            Enter the password to continue
+          </p>
+
+          <div className="space-y-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password..."
+              className="w-full px-5 py-3 rounded-xl bg-white/10 border border-white/20 focus:border-white/40 outline-none text-white placeholder-white/40 transition"
+            />
+
+            {passError && (
+              <p className="text-red-400 text-sm text-center">{passError}</p>
+            )}
+
+            <button
+              onClick={fetchCreationPass}
+              disabled={passLoading}
+              className="w-full py-3 rounded-xl bg-white text-black font-medium hover:bg-neutral-200 transition disabled:opacity-60"
+            >
+              {passLoading ? "Unlocking..." : "Unlock Story"}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

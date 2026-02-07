@@ -17,9 +17,6 @@ exports.postCreateCreation = async (req, res) => {
       });
     }
 
-   
-
-
     /* ================= INPUT ================= */
     let {
       recipientName,
@@ -33,15 +30,15 @@ exports.postCreateCreation = async (req, res) => {
       closingNote,
       timeline,
       imageMomentIndex,
-      } = req.body;
-      let creationPass;
-      
-      if (visibility === "private") {
-          if (!req.body.password) {
-              return res.status(400).json({ errors: ["No password"] });
-          }
-          creationPass = req.body.password;
+    } = req.body;
+    let creationPass;
+
+    if (visibility === "private") {
+      if (!req.body.password) {
+        return res.status(400).json({ errors: ["No password"] });
       }
+      creationPass = req.body.password;
+    }
 
     /* ================= PARSE TIMELINE ================= */
     if (timeline) {
@@ -97,47 +94,45 @@ exports.postCreateCreation = async (req, res) => {
       : [];
 
     /* ================= CLOUDINARY UPLOAD ================= */
-  
 
-   if (req.files && req.files.length > 0) {
-  const imageCountMap = {};
+    if (req.files && req.files.length > 0) {
+      const imageCountMap = {};
 
-  imageIndexes.forEach((index) => {
-    imageCountMap[index] = (imageCountMap[index] || 0) + 1;
-  });
-
-  for (const index in imageCountMap) {
-    const existingCount = timeline[index]?.images?.length || 0;
-
-    if (existingCount + imageCountMap[index] > 4) {
-      return res.status(400).json({
-        errors: ["Maximum 4 images allowed per moment"],
+      imageIndexes.forEach((index) => {
+        imageCountMap[index] = (imageCountMap[index] || 0) + 1;
       });
+
+      for (const index in imageCountMap) {
+        const existingCount = timeline[index]?.images?.length || 0;
+
+        if (existingCount + imageCountMap[index] > 4) {
+          return res.status(400).json({
+            errors: ["Maximum 4 images allowed per moment"],
+          });
+        }
+      }
+
+      // Now upload
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const momentIndex = imageIndexes[i];
+
+        if (!timeline[momentIndex]) continue;
+
+        const upload = await cloudinary.uploader.upload(
+          `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
+          { folder: "usstory/timeline" },
+        );
+
+        uploadedPublicIds.push(upload.public_id);
+
+        timeline[momentIndex].images ??= [];
+        timeline[momentIndex].images.push({
+          url: upload.secure_url,
+          publicId: upload.public_id,
+        });
+      }
     }
-  }
-
-  // Now upload
-  for (let i = 0; i < req.files.length; i++) {
-    const file = req.files[i];
-    const momentIndex = imageIndexes[i];
-
-    if (!timeline[momentIndex]) continue;
-
-    const upload = await cloudinary.uploader.upload(
-      `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
-      { folder: "usstory/timeline" }
-    );
-
-    uploadedPublicIds.push(upload.public_id);
-
-    timeline[momentIndex].images ??= [];
-    timeline[momentIndex].images.push({
-      url: upload.secure_url,
-      publicId: upload.public_id,
-    });
-  }
-}
-
 
     /* ================= CREATE ================= */
     const creation = new Creation({
@@ -155,24 +150,17 @@ exports.postCreateCreation = async (req, res) => {
       accentColor: accentColor || null,
 
       closingNote,
-      timeline
+      timeline,
     });
 
-    
-
-      
-      if (creation.visibility === "private") {
-          creation.password = creationPass;
+    if (creation.visibility === "private") {
+      creation.password = creationPass;
     }
-    
-
 
     await creation.save();
-    await Creator.findByIdAndUpdate(
-  req.session._id,
-  { $push: { creations: creation._id } }
-);
-
+    await Creator.findByIdAndUpdate(req.session._id, {
+      $push: { creations: creation._id },
+    });
 
     /* ================= RESPONSE ================= */
     res.status(201).json({
@@ -198,7 +186,6 @@ exports.postCreateCreation = async (req, res) => {
   }
 };
 
-
 /**
  * GET /creator/my-creations
  * Returns minimal info for logged-in user's creations
@@ -212,23 +199,18 @@ exports.getCreations = async (req, res) => {
       });
     }
 
-   
+    const creator = await Creator.findById(req.session._id).populate({
+      path: "creations",
+      select: "_id title recipientName",
+      options: { sort: { createdAt: -1 } },
+    });
 
-   const creator = await Creator.findById(req.session._id)
-  .populate({
-    path: "creations",
-    select: "_id title recipientName",
-    options: { sort: { createdAt: -1 } }
-  });
-    
     const creations = creator.creations;
-
 
     return res.status(200).json({
       success: true,
       creations,
     });
-
   } catch (error) {
     console.error("Get Creations Error:", error);
     return res.status(500).json({
@@ -237,9 +219,6 @@ exports.getCreations = async (req, res) => {
     });
   }
 };
-
-
-
 
 /**
  * POST /creator/creation/:creationId
@@ -254,26 +233,20 @@ exports.getSingleCreation = async (req, res) => {
       return res.status(400).json({
         errors: ["Invalid creation ID"],
       });
-      }
-      
-    
+    }
 
     /* ================= FETCH ================= */
     const creation = await Creation.findById(creationId)
-  .select(
-    "title recipientName message relationshipType visibility musicMood visualMood accentColor closingNote timeline creator"
-  )
-  .lean();
+      .select(
+        "title recipientName message relationshipType visibility musicMood visualMood accentColor closingNote timeline creator",
+      )
+      .lean();
 
-      
-       if (!creation) {
+    if (!creation) {
       return res.status(404).json({
         errors: ["Creation not found"],
       });
-      }
-      
-    
-   
+    }
 
     /* ================= VISIBILITY CHECK ================= */
     if (
@@ -298,7 +271,6 @@ exports.getSingleCreation = async (req, res) => {
     });
   }
 };
-
 
 exports.deleteCreation = async (req, res) => {
   try {
@@ -342,7 +314,6 @@ exports.deleteCreation = async (req, res) => {
       success: true,
       message: "Creation deleted successfully",
     });
-
   } catch (err) {
     console.error("Delete Creation Error:", err);
     return res.status(500).json({
@@ -351,7 +322,6 @@ exports.deleteCreation = async (req, res) => {
     });
   }
 };
-
 
 exports.getEditFetch = async (req, res) => {
   try {
@@ -366,9 +336,8 @@ exports.getEditFetch = async (req, res) => {
     const creationId = req.params.creationId;
 
     const creation = await Creation.findById(creationId).select(
-  "recipientName title message relationshipType visibility musicMood theme accentColor closingNote timeline creator password"
-);
-
+      "recipientName title message relationshipType visibility musicMood theme accentColor closingNote timeline creator password",
+    );
 
     if (!creation) {
       return res.status(404).json({
@@ -385,15 +354,11 @@ exports.getEditFetch = async (req, res) => {
       });
     }
 
-    
-   
-
     /* ================= RETURN DATA ================= */
     return res.status(200).json({
       success: true,
       creation,
     });
-
   } catch (err) {
     console.error("Delete Creation Error:", err);
     return res.status(500).json({
@@ -401,7 +366,7 @@ exports.getEditFetch = async (req, res) => {
       errors: ["Failed to delete creation"],
     });
   }
-}
+};
 
 exports.putUpdateCreation = async (req, res) => {
   const uploadedPublicIds = [];
@@ -409,8 +374,8 @@ exports.putUpdateCreation = async (req, res) => {
   try {
     if (!req?.session?.isLoggedIn || !req?.session?._id) {
       return res.status(401).json({
-        errors:["Unauthorized Access"]
-      })
+        errors: ["Unauthorized Access"],
+      });
     }
     const { creationId } = req.params;
 
@@ -424,9 +389,9 @@ exports.putUpdateCreation = async (req, res) => {
     }
 
     if (creation.creator.toString() !== req.session._id) {
-       return res.status(401).json({
-        errors:["Unauthorized Access"]
-      })
+      return res.status(401).json({
+        errors: ["Unauthorized Access"],
+      });
     }
     /* ================= PARSE BODY ================= */
 
@@ -461,20 +426,20 @@ exports.putUpdateCreation = async (req, res) => {
 
     /* ================= DELETE REMOVED IMAGES ================= */
 
-    const oldPublicIds = creation.timeline.flatMap(item =>
-      item.images.map(img => img.publicId).filter(Boolean)
+    const oldPublicIds = creation.timeline.flatMap((item) =>
+      item.images.map((img) => img.publicId).filter(Boolean),
     );
 
-    const newPublicIds = timeline.flatMap(item =>
-      (item.images || []).map(img => img.publicId).filter(Boolean)
+    const newPublicIds = timeline.flatMap((item) =>
+      (item.images || []).map((img) => img.publicId).filter(Boolean),
     );
 
     const removedPublicIds = oldPublicIds.filter(
-      id => !newPublicIds.includes(id)
+      (id) => !newPublicIds.includes(id),
     );
 
     await Promise.all(
-      removedPublicIds.map(id => cloudinary.uploader.destroy(id))
+      removedPublicIds.map((id) => cloudinary.uploader.destroy(id)),
     );
 
     /* ================= VALIDATE IMAGE LIMIT ================= */
@@ -482,7 +447,7 @@ exports.putUpdateCreation = async (req, res) => {
     if (req.files && req.files.length > 0) {
       const imageCountMap = {};
 
-      imageIndexes.forEach(index => {
+      imageIndexes.forEach((index) => {
         imageCountMap[index] = (imageCountMap[index] || 0) + 1;
       });
 
@@ -507,7 +472,7 @@ exports.putUpdateCreation = async (req, res) => {
 
         const upload = await cloudinary.uploader.upload(
           `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
-          { folder: "usstory/timeline" }
+          { folder: "usstory/timeline" },
         );
 
         uploadedPublicIds.push(upload.public_id);
@@ -547,7 +512,6 @@ exports.putUpdateCreation = async (req, res) => {
       success: true,
       message: "Creation updated successfully",
     });
-
   } catch (err) {
     console.error("Update Creation Error:", err);
 
@@ -566,4 +530,3 @@ exports.putUpdateCreation = async (req, res) => {
     });
   }
 };
-

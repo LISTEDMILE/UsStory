@@ -19,7 +19,7 @@ const viewerRouter = require("./routes/viewerRouter");
 
 const app = express();
 
-// CORS setup 
+// CORS setup
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -54,7 +54,6 @@ app.use((req, res, next) => {
   express.json()(req, res, next);
 });
 
-
 // Session middleware
 app.use(
   session({
@@ -74,15 +73,14 @@ app.use(
 // Attach session info to req
 app.use((req, res, next) => {
   req.isLoggedIn = req.session.isLoggedIn || false;
-    req._id = req.session._id || null;
+  req._id = req.session._id || null;
   next();
 });
 
 // API routes
 app.use("/auth", authRouter);
 app.use("/creator", creatorRouter);
-// app.use("/viewer", viewerRouter);
-
+app.use("/viewer", viewerRouter);
 
 // Connect to MongoDB and start server
 mongoose

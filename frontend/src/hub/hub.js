@@ -1,47 +1,45 @@
-
-
 export const MUSIC_MAP = [
   {
     id: "romantic",
     name: "romantic",
-    file: "/music/romantic.mp3"
+    file: "/music/romantic.mp3",
   },
   {
     id: "bestFriend",
     name: "bestFriend",
-    file: "/music/bestFriend.mp3"
+    file: "/music/bestFriend.mp3",
   },
   {
     id: "college",
     name: "college",
-    file: "/music/college.mp3"
+    file: "/music/college.mp3",
   },
   {
     id: "family",
     name: "family",
-    file: "/music/family.mp3"
+    file: "/music/family.mp3",
   },
   {
     id: "friend",
     name: "friend",
-    file: "/music/friend.mp3"
+    file: "/music/friend.mp3",
   },
   {
     id: "mentor",
     name: "mentor",
-    file: "/music/mentor.mp3"
-  }
+    file: "/music/mentor.mp3",
+  },
 ];
 
- export const possibleRelationShipTypes = [
-    "friend",
-    "best-friend",
-    "love",
-    "family",
-    "mentor",
-    "colleague",
+export const possibleRelationShipTypes = [
+  "friend",
+  "best-friend",
+  "love",
+  "family",
+  "mentor",
+  "colleague",
 ];
-  
+
 export const THEME_MAP = {
   warm: {
     bg: "from-rose-950 via-black to-orange-950",

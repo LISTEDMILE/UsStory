@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Creation = require('./creationModel');
+const Creation = require("./creationModel");
 
 const creatorSchema = new mongoose.Schema(
   {
@@ -25,10 +25,8 @@ const creatorSchema = new mongoose.Schema(
         ref: "Creation",
       },
     ],
-
-   
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 /* =========================================================
    CASCADE DELETE: Delete all creations when creator is deleted

@@ -11,7 +11,7 @@ export async function apiFetch(endpoint, options = {}) {
   });
 
   const data = await res.json().catch(() => ({}));
-  
+
   if (!res.ok) {
     throw data;
   }

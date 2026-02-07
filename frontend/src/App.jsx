@@ -15,14 +15,14 @@ import Creations from "./creator/creations";
 import AboutUs from "./general/aboutUs";
 import Help from "./general/help";
 import Contact from "./general/contactUs";
-
+import SeeCreationViewer from "./viewer/seeCreationViewer";
 
 function Layout() {
   return (
     <>
-      <Header/>
+      <Header />
       <Outlet />
-     <Footer/>
+      <Footer />
     </>
   );
 }
@@ -34,9 +34,8 @@ function App() {
     const fetchAboutLogin = async () => {
       try {
         const data = await apiFetch("/auth/me", {
-                method: "POST",
-               
-              });
+          method: "POST",
+        });
         if (data.isLoggedIn) {
           dispatch(
             userActions.Login({
@@ -54,7 +53,7 @@ function App() {
 
   const route = createBrowserRouter([
     {
-      element: <Layout/>,
+      element: <Layout />,
       children: [
         { path: "/", element: <LandingPage /> },
         { path: "/aboutUs", element: <AboutUs /> },
@@ -65,9 +64,11 @@ function App() {
         { path: "/creator/create/:creationId", element: <CreateCreation /> },
         { path: "/creator/create", element: <CreateCreation /> },
         { path: "/creator/creation/:creationId", element: <SeeCreation /> },
-        
         { path: "/creator/creations", element: <Creations /> },
-         
+        {
+          path: "/viewer/creation/:creationId",
+          element: <SeeCreationViewer />,
+        },
       ],
     },
   ]);
