@@ -15,3 +15,13 @@
 .animate-fade {
   animation: fadeSoft 2.5s ease-in-out infinite;
 }
+
+/* Hide scrollbar but keep scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

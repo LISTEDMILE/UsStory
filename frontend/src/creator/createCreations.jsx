@@ -26,7 +26,7 @@ export default function CreateCreation() {
     visibility: "public",
     password: "",
     musicMood: "romantic",
-    theme: "warm",
+    visualMood: "warm",
     closingNote: "",
     accentColor: "#ffffff",
   });
@@ -68,7 +68,7 @@ export default function CreateCreation() {
           visibility: data.visibility || "public",
           password: data.password || "",
           musicMood: data.musicMood || "romantic",
-          theme: data.theme || "warm",
+          visualMood: data.visualMood || "warm",
           closingNote: data.closingNote || "",
           accentColor: data.accentColor || "#ffffff",
         });
@@ -138,34 +138,31 @@ export default function CreateCreation() {
     setTimeline(timeline.filter((_, i) => i !== index));
   };
 
- const handleImageAdd = async (index, files) => {
-  const updated = [...timeline];
+  const handleImageAdd = async (index, files) => {
+    const updated = [...timeline];
 
-  const options = {
-    maxSizeMB: 1,               // Max 1MB
-    maxWidthOrHeight: 1200,     // Resize if too large
-    useWebWorker: true,
+    const options = {
+      maxSizeMB: 0.2,
+      maxWidthOrHeight: 800,
+      initialQuality: 0.5,
+      useWebWorker: true,
+    };
+
+    const compressedImages = await Promise.all(
+      Array.from(files).map(async (file) => {
+        const compressedFile = await imageCompression(file, options);
+
+        return {
+          file: compressedFile,
+          preview: URL.createObjectURL(compressedFile),
+        };
+      }),
+    );
+
+    updated[index].images = [...updated[index].images, ...compressedImages];
+
+    setTimeline(updated);
   };
-
-  const compressedImages = await Promise.all(
-    Array.from(files).map(async (file) => {
-      const compressedFile = await imageCompression(file, options);
-
-      return {
-        file: compressedFile,
-        preview: URL.createObjectURL(compressedFile),
-      };
-    })
-  );
-
-  updated[index].images = [
-    ...updated[index].images,
-    ...compressedImages,
-  ];
-
-  setTimeline(updated);
-};
-
 
   const removeImage = (momentIndex, imageIndex) => {
     const updated = [...timeline];
@@ -484,8 +481,8 @@ export default function CreateCreation() {
           <div>
             <label className="mb-2 block text-sm text-neutral-400">Theme</label>
             <select
-              name="theme"
-              value={form.theme}
+              name="visualMood"
+              value={form.visualMood}
               onChange={handleChange}
               className="w-full rounded-xl border border-white/10 bg-black px-5 py-4"
             >

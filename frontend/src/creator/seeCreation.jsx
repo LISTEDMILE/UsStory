@@ -398,7 +398,7 @@ export default function SeeCreation() {
                 <div key={i} className=" moment relative">
                   {/* OUTER CONTAINER */}
                   <div
-                    className={`w-[95vw] md:w-[80vw] flex flex-col md:flex-row md:flex-row-reverse items-center rounded-[2.5rem] bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.4)] overflow-hidden overflow-y-scroll max-h-[80dvh]`}
+                    className={`no-scrollbar w-[95vw] md:w-[80vw] flex flex-col md:flex-row md:flex-row-reverse items-center rounded-[2.5rem] bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_20px_80px_rgba(0,0,0,0.4)] overflow-hidden overflow-y-scroll max-h-[80dvh]`}
                   >
                     {/* CENTER LINE */}
                     <div

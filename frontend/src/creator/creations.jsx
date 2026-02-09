@@ -53,10 +53,17 @@ export default function Creations() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-6 py-24 ">
-      <h1 className="text-3xl md:text-4xl font-light mb-16 tracking-wide">
-        My Creations
+    <div className="min-h-screen bg-black text-white px-6 py-10 ">
+      <h1 className="text-3xl md:text-4xl font-light mb-8 text-center tracking-wide">
+        My Stories
       </h1>
+
+      <Link
+        to="/creator/create"
+        className="inline-block mb-12 px-6 py-3 text-sm border border-white/20 rounded-full hover:bg-white hover:text-black transition duration-300"
+      >
+        + Create New
+      </Link>
 
       {creations.length === 0 ? (
         <div className="text-white/60">You haven’t created anything yet.</div>

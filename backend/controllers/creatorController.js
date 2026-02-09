@@ -336,7 +336,7 @@ exports.getEditFetch = async (req, res) => {
     const creationId = req.params.creationId;
 
     const creation = await Creation.findById(creationId).select(
-      "recipientName title message relationshipType visibility musicMood theme accentColor closingNote timeline creator password",
+      "recipientName title message relationshipType visibility musicMood visualMood accentColor closingNote timeline creator password",
     );
 
     if (!creation) {
