@@ -127,14 +127,14 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                   to={"/creator/create"}
                 >
-                  New Story
+                  Create Story
                 </Link>
                 <Link
                   className="hover:text-white transition hover:underline"
                   onClick={() => setOpen(false)}
                   to={"/creator/creations"}
                 >
-                  Stories
+                  My Stories
                 </Link>
               </>
             ) : (
