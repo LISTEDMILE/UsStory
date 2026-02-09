@@ -48,6 +48,12 @@ export default function AboutUs() {
           <div className="floatingGlow absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-violet-600/20 blur-3xl" />
         </div>
 
+        <div className="flex flex-col md:flex-row justify-center items-center gap-50">
+          <img src="/me.jpeg" className="mb-20 h-[300px] rounded-2xl border-2" />
+          <p className="flex flex-col gap-3 text-6xl ">Kunal Sharma <span className="text-4xl w-full border-t rounded-2xl">Developer</span></p>
+        </div>
+       
+
         <h1 className="reveal text-5xl md:text-7xl font-bold tracking-tight">
           We Believe Memories
           <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
