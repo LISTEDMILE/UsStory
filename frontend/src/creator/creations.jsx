@@ -33,6 +33,8 @@ export default function Creations() {
     const confirmDelete = window.confirm("Delete this creation?");
     if (!confirmDelete) return;
 
+setIsLoading(true);
+
     try {
       const res = await apiFetch(`/creator/delete/${id}`, {
         method: "DELETE",
@@ -44,6 +46,7 @@ export default function Creations() {
     } catch (err) {
       console.error(err);
     }
+setIsLoading(false);
   };
 
   const copyLink = (id) => {
