@@ -4,12 +4,16 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import PageLoader from "../compo/Loader";
 import imageCompression from "browser-image-compression";
+import { useNavigate } from "react-router-dom";
+
+
 
 import { MUSIC_MAP, possibleRelationShipTypes } from "../hub/hub";
 
 export default function CreateCreation() {
   const { creationId } = useParams(); // 👈 Detect edit mode
   const container = useRef(null);
+const navigate = useNavigate();
 
   const audioRef = useRef(null);
   const [previewing, setPreviewing] = useState(null);
@@ -253,6 +257,11 @@ export default function CreateCreation() {
           ? "Story updated successfully ✨"
           : "Story created successfully ✨",
       );
+alert(isEditMode
+          ? "Story updated successfully ✨"
+          : "Story created successfully ✨",
+      );
+navigate("/creator/creations");
     } catch (err) {
       setError(err.message);
     } finally {
