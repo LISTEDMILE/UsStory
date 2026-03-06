@@ -87,7 +87,7 @@ mongoose
   .connect(DB_path)
   .then(() => {
     app.listen(port, "0.0.0.0", () => {
-      console.log(`Server Running at http://localhost:${port}`);
+      console.log(`Server Running at Port :${port}`);
     });
   })
   .catch((err) => {
