@@ -16,6 +16,7 @@ import AboutUs from "./general/aboutUs";
 import Help from "./general/help";
 import Contact from "./general/contactUs";
 import SeeCreationViewer from "./viewer/seeCreationViewer";
+import ErrorPage from "./general/ErrorPage";
 
 function Layout() {
   return (
@@ -69,6 +70,7 @@ function App() {
           path: "/viewer/creation/:creationId",
           element: <SeeCreationViewer />,
         },
+        {path:"*",element:<ErrorPage/>}
       ],
     },
   ]);
