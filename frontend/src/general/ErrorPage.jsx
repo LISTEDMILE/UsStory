@@ -72,10 +72,14 @@ export default function ErrorPage() {
       <span className="floating absolute bottom-16 right-16 text-5xl">👀</span>
       <span className="floating absolute top-1/2 left-12 text-3xl">😭</span>
 
+        <p className="mt-6 text-4xl font-bold text-pink-400 text-center">
+        {randomMessage}
+      </p>
+
       {/* Big Emoji */}
       <div
         ref={emojiRef}
-        className="text-[170px] md:text-[220px] leading-none drop-shadow-2xl"
+        className="text-[170px] md:text-[220px] leading-none drop-shadow-2xl mt-8"
       >
         🗿
       </div>
@@ -84,20 +88,13 @@ export default function ErrorPage() {
         ERROR • 404
       </p>
 
-      <h1
-        ref={titleRef}
-        className="mt-6 text-4xl md:text-6xl font-black text-center"
-      >
-        Bro... what URL are you cooking? 💀
-      </h1>
+      
 
-      <p className="mt-6 text-3xl font-bold text-pink-400 text-center">
-        {randomMessage}
-      </p>
+    
 
       <p
         ref={subRef}
-        className="mt-5 max-w-2xl text-center text-zinc-400 text-lg leading-8"
+        className="mt-5 max-w-2xl pl-4 text-zinc-400 text-lg leading-8"
       >
         Alright... that's enough.
         <br />
