@@ -6,10 +6,37 @@ import { apiFetch } from "../api/api";
 import { Link } from "react-router-dom";
 
 export default function Header() {
+  const [loading, setLoading] = useState(false);
   const { isLoggedIn } = useSelector((state) => state.userInfo);
   const [open, setOpen] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [pass, setPass] = useState("");
+
+  const DeleteAccount = async () => {
+    setLoading(true);
+    try {
+
+      const res = await apiFetch("/auth/deleteAccount", {
+        method: "POST",
+        body:JSON.stringify({password:pass})
+      });
+
+      
+
+      if (res.success) {
+        window.location.href = "/";
+      } else {
+        alert(res.errors[0]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.errors[0]);
+    }
+    setLoading(false);
+  }
 
   const logout = async () => {
+    setLoading(true);
     try {
       const res = await apiFetch("/auth/logout", {
         method: "POST",
@@ -24,6 +51,7 @@ export default function Header() {
     } catch (err) {
       console.error(err);
     }
+    setLoading(false);
   };
 
   useGSAP(() => {
@@ -175,8 +203,19 @@ export default function Header() {
                       logout();
                       setOpen(false);
                     }}
+                    disabled={loading}
                   >
                     Logout
+                  </button>
+
+                  <button
+                    className="px-5 py-2 text-sm  border border-red-600 rounded-full text-white hover:bg-red-600/20 transition duration-300"
+                    onClick={() => {
+                      setShowDelete(true);
+                      setOpen(false);
+                    }}
+                  >
+                    Delete Account
                   </button>
                 </>
               ) : (
@@ -192,6 +231,75 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {showDelete && <div className="w-screen h-screen inset-0 z-30 fixed bg-black/60 flex justify-center items-center"
+        
+      >
+        <div className="w-full h-full absolute" onClick={() => setShowDelete(false)}></div>
+        
+        <div className="w-[90%] max-w-md rounded-2xl border border-white/10 bg-[#111111] p-6 shadow-2xl z-40">
+          {/* Header */}
+          <div className="w-full flex justify-end">
+            <button
+      onClick={() => setShowDelete(false)}
+      className="rounded-lg p-2 text-gray-400 transition hover:bg-white/5 hover:text-white "
+    >
+      ✕
+    </button>
+          </div>
+           
+  
+           
+             
+      <h2 className="text-xl font-semibold text-white">
+        Delete Account
+      </h2>
+      <p className="mt-2 text-sm text-gray-400">
+        This action is permanent. Your account and all associated data will be
+        deleted and cannot be recovered.
+              </p>
+               
+    
+
+   
+ 
+
+  {/* Password */}
+  <div className="mt-6">
+    <label className="mb-2 block text-sm font-medium text-gray-300">
+      Confirm your password
+    </label>
+
+    <input
+      type="password"
+      value={pass}
+      placeholder="Enter your password"
+      onChange={(e) => setPass(e.target.value)}
+      className="w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-3 text-white placeholder:text-gray-500 outline-none transition focus:border-red-500"
+    />
+  </div>
+
+  {/* Buttons */}
+  <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+    <button
+      onClick={() => setShowDelete(false)}
+      className="rounded-xl border border-white/10 px-5 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/5"
+    >
+      Cancel
+    </button>
+
+    <button
+      onClick={DeleteAccount}
+      disabled={loading}
+      className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {loading ? "Deleting..." : "Delete Account"}
+    </button>
+  </div>
+</div>
+
+      </div>}
+     
     </header>
   );
 }
